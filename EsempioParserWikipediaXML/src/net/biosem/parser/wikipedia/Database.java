@@ -66,7 +66,7 @@ public boolean connect() {
             }
          }
          connected = true;
- 		 outRel = new PrintWriter(new FileWriter("fileTest/outputRelazioniSuFile.txt"));
+ 		 outRel = new PrintWriter(new FileWriter("fileTest/outputRelazioniSuFile1.txt"));
       } else {
          System.out.println("Manca il nome del database!!");
          System.out.println("Scrivere il nome del database da utilizzare all'interno del file \"config.xml\"");
@@ -157,6 +157,15 @@ public int insertAttributo(String attributo){
 public void insertPersonaggio(int id, String nome){
 	try {
 	    executeUpdate("INSERT into personaggi (id, nome) VALUES("+id+", \""+nome+"\")");  
+	 } catch (Exception e) { 
+    	e.printStackTrace(); 
+    	e.getMessage(); 
+     }   
+}
+
+public void insertUrlImage(int id_personaggio, String url){
+	try {
+		executeUpdateGetId("INSERT into dati (id_personaggio, id_attributo, dato, id_tipo) VALUES("+id_personaggio+", 11,  \""+url+"\", 3)");  
 	 } catch (Exception e) { 
     	e.printStackTrace(); 
     	e.getMessage(); 
@@ -356,14 +365,14 @@ public int checkInDescrizioni(String nomeCogn){
 	return conteggio;
 }
 
-public int checkPageToPage(int id){
+public int checkPageToPage(int id){	
 	 List<Integer> listaPersonaggiCorrelati = new ArrayList<Integer>();
-	 listaPersonaggiCorrelati.add(id);
 	 
 	 Statement stmt;
 	 ResultSet rs;
 	 String query = null;
 	 int conteggio = 0;
+	 int id_personaggio_correlato = 0;
 	 String personaggio = new String("");
 	 
 	try {
@@ -373,8 +382,12 @@ public int checkPageToPage(int id){
 		 while (rs.next()) {
 			 personaggio = rs.getString("pl_title").replace("_", " ").replace("\"", "");			 
 			 if(checkExistPersonaggio(personaggio)!=-1){
-				 listaPersonaggiCorrelati.add(checkExistPersonaggio(personaggio));
-				 System.out.print("personaggio correlato => "+personaggio+"\n");
+				 id_personaggio_correlato = checkExistPersonaggio(personaggio);
+				 listaPersonaggiCorrelati.add(id_personaggio_correlato);
+				 outRel.flush();
+				 outRel.println(id+","+id_personaggio_correlato+",3"+"\n");
+				 outRel.println(id_personaggio_correlato+","+id+",3"+"\n");
+				 //System.out.print("personaggio correlato => "+personaggio+"\n");
 			 	 conteggio++;
 			 }
 		 }
@@ -386,7 +399,6 @@ public int checkPageToPage(int id){
 		insertRelazioniToFile (listaPersonaggiCorrelati);
 	return conteggio;
 }
-
 /*public void insertRelazioni(List<Integer> listaPersonaggiCorrelati){
 	
 	int id_personaggio1;
@@ -426,13 +438,12 @@ public void insertRelazioniToFile(List<Integer> listaPersonaggiCorrelati){
 	try {		
 		for(int i=0; i<=listaPersonaggiCorrelati.size()-1;i++){
 			for(int j=0; j<=listaPersonaggiCorrelati.size()-1;j++){
-				int tot_relazioni=0;
 				id_personaggio1=listaPersonaggiCorrelati.get(i);
 				id_personaggio2=listaPersonaggiCorrelati.get(j);
 				if(id_personaggio1 != id_personaggio2){		
 					try{	
 					outRel.flush();
-					outRel.println(id_personaggio1+","+id_personaggio2+"\n");  
+					outRel.println(id_personaggio1+","+id_personaggio2+",1"+"\n");  
 					//outRel.println("");
 				 }
 				 catch(Exception e){	    
@@ -469,12 +480,12 @@ public void selectPage(){
 	}    
 }
 
-public void printPersonaggio(int id_personaggio){
+public String printPersonaggio(int id_personaggio){
 	
 	 Statement stmt;
 	 ResultSet rs;
 	 String query = null;
-	 int conteggio = 0;
+	 String nomePersonaggio = new String("");
 	 
 	try {
 		stmt = conn.createStatement();
@@ -484,13 +495,14 @@ public void printPersonaggio(int id_personaggio){
 		 
 		 rs = stmt.executeQuery(queryEnc);
 		 while (rs.next()) {
-			 System.out.println(rs.getString("nome"));
+			 //System.out.println(rs.getString("nome"));
+			 nomePersonaggio = rs.getString("nome");
 		 }
 
 	} catch (Exception e) {
 		e.printStackTrace();
 	}    
-
+		return nomePersonaggio;
 }
 
 /**

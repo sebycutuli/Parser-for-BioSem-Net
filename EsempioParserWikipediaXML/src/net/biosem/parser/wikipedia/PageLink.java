@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class PageLink {
 	
-	private static  boolean  cleanRelazioni = true;
+	private static  boolean  cleanRelazioni = false;
 	private static  boolean  relazioni = true;
 			
     static public void main(String argv[]) throws InterruptedException, IOException {    
@@ -30,7 +30,7 @@ public class PageLink {
     	 //PrintWriter outRel = null;
     	 
     	 //connessione al Database
-    	 Database db = new Database("wikipages","","root","localhost");
+    	 Database db = new Database("altripersonaggi","","root","localhost");
     	 if(db.connect()){
     		 	System.out.println("Connessione al Database ESEGUITA.");    		 	
     	 }
@@ -43,35 +43,19 @@ public class PageLink {
     	 if(relazioni){
 			 int cont = 0;
 			 System.out.println("Relazioni delle sole Biografie");
-			 //outRel = new PrintWriter(new FileWriter("fileTest/outputRelazioniPageToPage.txt"));
-
-			 try{
-				 //outRel.println("Relazioni delle sole Biografie");
-			 }
-			 catch(Exception e){	    
-				e.printStackTrace();
-			 }
 			 
 				 //tiro fuori Nome+Cognome corrente				
 				 List<Integer> listaPersonaggi = db.getIDPersonaggi();
-				 for (int id : listaPersonaggi) {	
+				 for (int id : listaPersonaggi) {
+				  if(id>0){
 					System.out.println("\nIl Personaggio ");
 					db.printPersonaggio(id);
 					System.out.println("E' correlato con ");
 					cont = db.checkPageToPage(id);						
 					System.out.println("=====>"+cont+"\n\n");
-					
-					/*try{	
-						outRel.flush();
-						outRel.println(id + " � correlato con "+cont+" personaggi.");
-						outRel.println("");
-					 }
-					 catch(Exception e){	    
-						 e.printStackTrace();
-					 }*/
-			    }
+			      }
+				 }
     	 }
- 	 
     	 
     	 long endTime = System.currentTimeMillis();
     	 System.out.println("Tempo Esecuzione: " + (endTime - startTime) + " millisecondi => secondi "+(endTime - startTime)/1000);

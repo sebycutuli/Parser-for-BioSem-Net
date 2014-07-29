@@ -24,15 +24,42 @@ public class searchImage {
 
 	public static void main(String[] args) {
 		
+	 Database db = new Database("test","","root","localhost");
+   	 if(db.connect()){
+   		 	System.out.println("Connessione al Database ESEGUITA.");    		 	
+   	 }
+		
+		try {  			  
+            
+			 List<Integer> listaPersonaggi = db.getIDPersonaggi();
+			 for (int id : listaPersonaggi) {
+				String nome = db.printPersonaggio(id);
+				System.out.println("\nIl Personaggio "+nome+" "+id);
+				String urlImage = getUrlImage(nome);
+				System.out.println(" ha URL immagine: "+urlImage);
+				db.insertUrlImage(id, urlImage);
+				//System.out.println("=====>"+cont+"\n\n");
+			 }
+		}		
+		catch(Exception e){
+			System.out.println(e);
+		}
+		db.disconnect(); 
+	}
+	
+public static String getUrlImage (String nomePersonaggio){
+		
+        String urlImage = new String ("");
+
 		try {  
-			  
+			         
             URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?" +  
-                        "v=1.0&q=laura%20pausini&key=ABQIAAAAMDidA1PAO0alsihAElsy3xTLCrE5uk8Ud_JrDKiWLKYeT0PD8xQ9hbFvmXJ2enaXdFRHJflbRAe36A&userip=192.168.1.51");  
+                    "v=1.0&q="+nomePersonaggio.replace(" ", "%20")+"&key=AIzaSyB1enrurNo01M3LI6gxlyLiNLByv8gt8JM");
   
             URLConnection connection = url.openConnection();  
             connection.addRequestProperty("Referer","http://www.defekas.com");  
   
-            String line;  
+            String line; 
             StringBuilder builder = new StringBuilder();  
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));  
               
@@ -44,28 +71,17 @@ public class searchImage {
         	JSONArray jsonArray = responseData.getJSONArray("results");
         	if ((jsonArray != null) && (!jsonArray.isNull(0))) {
         	    JSONObject result0 = (JSONObject) jsonArray.get(0);
-        	    String urlImage = (String) result0.get("url");
-        	    //System.out.println(urlImage);        	    
-        	    URL url2 = new URL(urlImage);
-        	    Image image = ImageIO.read(url2);
-        	    System.out.println(result0.toString());
-        	    /*JFrame frame = new JFrame();
-        	    JLabel label = new JLabel(new ImageIcon(image));
-        	    frame.getContentPane().add(label, BorderLayout.CENTER);
-        	    frame.pack();
-        	    frame.setVisible(true);*/
-        	    //URLConnection urlC = url.openConnection();  
-        	    //urlC.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 5.1; rv:19.0) Gecko/20100101 Firefox/19.0"); 
+        	    urlImage = (String) result0.get("url");
+        	    //System.out.println(urlImage);
         	} else {
         	    System.out.println("Image Not Found");
         	}
-        	
-    		
-
 		}
-		
 		catch(Exception e){
 			System.out.println(e);
+			System.exit(0);
 		}
+		
+			return urlImage;
 	}
 }
